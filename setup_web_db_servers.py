@@ -41,5 +41,17 @@ def remove_mysql():
     sudo('service mysql stop && apt remove --purge mysql-server mysql-client -y')
 
 @task
+def autoremove():
+    sudo('apt-get autoremove -y')
+
+@task
 def setup():
     dist_upgrade()
+    install_nginx()
+    install_mysql()
+
+@task
+def clear():
+    remove_nginx()
+    remove_mysql()
+    autoremove()
