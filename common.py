@@ -14,7 +14,7 @@ def get_hostname():
 def status():
     run('uptime')
     run('cat /proc/loadavg')
-    run('free')
+    run('free -h')
     run('df -h')
 
 @task

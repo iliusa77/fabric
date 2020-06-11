@@ -2,17 +2,17 @@ from fabric.api import *
 from fabric import *
 from fabtools import *
 from common import dist_upgrade
+from fabric.contrib.files import *
 
 env.hosts = [
-    'vagrant@192.168.33.15',
-    'vagrant@192.168.0.106'
+    'vagrant@192.168.5.161'
     ]
 # env.parallel = 'True'
 env.warn_only='True'
 
 env.roledefs = {
-    'web': ['vagrant@192.168.33.15'],
-    'db': ['vagrant@192.168.0.106']
+    'web': ['vagrant@192.168.5.161'],
+    'db': ['vagrant@192.168.5.161']
 }
 
 
@@ -36,6 +36,20 @@ def remove_nginx():
 def install_mysql():
     sudo('apt install mysql-server mysql-client -y')
 
+@task
+@roles('db')
+def configure_mysql():
+    mysql_config_variables = {
+            'bind-address': '1.2.3.4'
+        }
+    upload_template(
+        filename='templates/mysql/mysql_config',
+        destination='/etc/mysql/mysql.conf.d/mysqld.cnf',
+        context=mysql_config_variables,
+        use_sudo=True
+        )
+    sudo('systemctl unmask mysql.service && service mysql restart')
+    
 @task 
 def remove_mysql():
     sudo('service mysql stop && apt remove --purge mysql-server mysql-client -y')
@@ -49,6 +63,7 @@ def setup():
     dist_upgrade()
     install_nginx()
     install_mysql()
+    configure_mysql()
 
 @task
 def clear():
